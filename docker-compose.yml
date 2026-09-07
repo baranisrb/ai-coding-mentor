@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # Pulled from your shell environment or a root .env file next to this
+      # docker-compose.yml. The key is NEVER hard-coded into the Dockerfile.
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8000
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+      - MAX_CODE_SIZE=${MAX_CODE_SIZE:-100000}
+      - MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE:-200000}
+      - GEMINI_TIMEOUT_SECONDS=${GEMINI_TIMEOUT_SECONDS:-45}
+      - GEMINI_MAX_RETRIES=${GEMINI_MAX_RETRIES:-2}
+      - ENABLE_CODE_EXECUTION=${ENABLE_CODE_EXECUTION:-false}
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
